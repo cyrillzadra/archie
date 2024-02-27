@@ -1,31 +1,20 @@
 apply plugin: 'maven-publish'
-if(gradle.ext.shouldSign) {
-  apply plugin: 'signing'
-  signing {
-    afterEvaluate { project ->
-      useGpgCmd()
-      sign publishing.publications
-    }
-  }
-}
-//define the repositories on global level, not per project, or you get many of them
+
 publishing {
+
   repositories {
     maven {
-      name = "ossrh"
-      // OSSRH URLS
-      def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-      def snapshotsRepoUrl = 'ttps://oss.sonatype.org/content/repositories/snapshots/'
+      def releasesRepoUrl = "${nexusReleasesUrl}"
+      def snapshotsRepoUrl = "${nexusSnapshotsUrl}"
       url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-
       credentials {
-        username = project.hasProperty('ossrhUsername') ? ossrhUsername : "Unknown user"
-        password = project.hasProperty('ossrhPassword') ? ossrhPassword : "Unknown password"
+        username = "${nexusUsername}"
+        password = "${nexusPassword}"
       }
+      logger.info("publishing '{}' with version '{}' to '{}'", project.name, version, url)
     }
   }
 }
-
 
 //now uploading will have to be configured on a per subproject basis
 subprojects {
